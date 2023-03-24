@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="3bf1bfa3-8026-435c-9dda-d43387b5b844" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="scatter_gatherFlow" doc:id="1f6e8bb9-c17c-4223-a875-416f87b7f861" >
+		<http:listener doc:name="Listener" doc:id="5cc59b2f-7adc-4b19-88f2-d043950c7af5" path="/sg" config-ref="HTTP_Listener_config"/>
+		<logger level="INFO" doc:name="Logger" doc:id="a5e53262-10b7-41b2-ad18-6c38541251d0" message="before scatter gather"/>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="00f7f196-87a2-492f-a903-593d970546e6" >
+			<route >
+				<set-payload value="payload1" doc:name="payload1" doc:id="6a977da7-c49c-4b1f-8d1a-93779513789e" />
+			</route>
+			<route >
+				<set-payload value="payload2" doc:name="payload2" doc:id="88cc9a51-b3ca-4639-90ea-6ff6618509c4" />
+			</route>
+			<route >
+				<set-payload value="payload3" doc:name="payload3" doc:id="e2530fea-8bda-4559-a6df-1032e3878ca1" />
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="o/p is collection of all targets from scatter_gather" doc:id="c61870c0-5fe9-4633-9ee0-2373f61e151f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="scatter_gatherFlow1" doc:id="792cd126-7d81-4fa6-a877-ecf50eedb2f8" >
+		<http:listener doc:name="Listener" doc:id="4dce4be5-57fa-49e8-bb5e-c060a8f66165" config-ref="HTTP_Listener_config" path="/sg1"/>
+		<ee:transform doc:name="input payload" doc:id="5fc563a0-7464-487c-81eb-7905726a1405" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"firstNumber":99,
+	"secondNumber":77
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="cbc41bb6-6d35-4f45-b717-8ce8ef56cf64" message="before scatter"/>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="962d95ca-8cb6-442b-a88c-368d377c7a40" >
+			<route >
+				<set-variable value="#[payload.firstNumber + payload.secondNumber]" doc:name="result" doc:id="4294e570-ff60-444e-82f5-02d421f9c389" variableName="result"/>
+			</route>
+			<route >
+				<set-variable value="#[payload.firstNumber - payload.secondNumber]" doc:name="result" doc:id="8956f076-93e7-48c3-b8fe-9fbb785bc905" variableName="result"/>
+			</route>
+			<route >
+				<set-variable value="#[payload.firstNumber mod payload.secondNumber]" doc:name="Set Variable" doc:id="77b7b213-bf63-4214-ad76-f225a60ff117" variableName="result"/>
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="vars.result gives the result of all TARGETS responses from SCATTER GATHER" doc:id="aaf3e3e8-e347-4ff7-8172-e7657d0eb89c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+vars.result]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="scatter_gatherFlow2" doc:id="a52415a0-b9a8-4595-adfa-ce2d44a3ded7" >
+		<http:listener doc:name="Listener" doc:id="a6a52c34-1c7a-4777-919f-c807bbd849c1" config-ref="HTTP_Listener_config" path="/sg2"/>
+		<ee:transform doc:name="input payload" doc:id="2636ce32-e7fa-4566-b12d-529354ac5af2" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"firstNumber":99,
+	"secondNumber":77
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="42e6b30a-3dc6-43b7-a599-9aff4ec17b04" message="before scatter"/>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="89993a26-8780-4170-aff8-4d1dca960bff" >
+			<route >
+				<set-variable value="#[payload.firstNumber + payload.secondNumber]" doc:name="addition" doc:id="d421419f-d588-4973-a9b6-983c14cf705a" variableName="addition"/>
+			</route>
+			<route >
+				<set-variable value="#[payload.firstNumber - payload.secondNumber]" doc:name="substraction" doc:id="0ffdda5b-faed-46cf-a171-5708c0733dae" variableName="substraction"/>
+			</route>
+			<route >
+				<set-variable value="#[payload.firstNumber mod payload.secondNumber]" doc:name="mod" doc:id="e9d6c777-51ce-470e-9072-211f7be81f7f" variableName="mod"/>
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="geeting responses from all targets from SG" doc:id="6ec17d6b-d5ac-4c34-9c56-cd4378b2a672">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"addition of two":vars.addition,
+	"substraction of two":vars.substraction,
+	"mod of two":vars.mod
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+	</flow>
+</mule>
